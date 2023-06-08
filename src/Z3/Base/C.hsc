@@ -1038,6 +1038,9 @@ foreign import ccall unsafe "Z3_get_re_sort_basis"
                          -> Ptr Z3_sort
                          -> IO (Ptr Z3_sort)
 
+foreign import ccall unsafe "Z3_mk_char_sort"
+    z3_mk_char_sort :: Ptr Z3_context -> IO (Ptr Z3_sort)
+
 foreign import ccall unsafe "Z3_mk_string_sort"
     z3_mk_string_sort :: Ptr Z3_context -> IO (Ptr Z3_sort)
 
@@ -1110,6 +1113,20 @@ foreign import ccall unsafe "Z3_mk_str_to_int"
 foreign import ccall unsafe "Z3_mk_int_to_str"
     z3_mk_int_to_str :: Ptr Z3_context -> Ptr Z3_ast -> IO (Ptr Z3_ast)
 
+foreign import ccall unsafe "Z3_mk_string_to_code"
+    z3_mk_string_to_code :: Ptr Z3_context -> Ptr Z3_ast -> IO (Ptr Z3_ast)
+
+foreign import ccall unsafe "Z3_mk_string_from_code"
+    z3_mk_string_from_code :: Ptr Z3_context -> Ptr Z3_ast -> IO (Ptr Z3_ast)
+
+{-
+foreign import ccall unsafe "Z3_mk_ubv_to_string"
+    z3_mk_ubv_to_string :: Ptr Z3_context -> Ptr Z3_ast -> IO (Ptr Z3_ast)
+
+foreign import ccall unsafe "Z3_mk_sbv_to_string"
+    z3_mk_sbv_to_string :: Ptr Z3_context -> Ptr Z3_ast -> IO (Ptr Z3_ast)
+-}
+
 foreign import ccall unsafe "Z3_mk_seq_to_re"
     z3_mk_seq_to_re :: Ptr Z3_context -> Ptr Z3_ast -> IO (Ptr Z3_ast)
 
@@ -1149,6 +1166,25 @@ foreign import ccall unsafe "Z3_mk_re_empty"
 foreign import ccall unsafe "Z3_mk_re_full"
     z3_mk_re_full :: Ptr Z3_context -> Ptr Z3_sort -> IO (Ptr Z3_ast)
 
+foreign import ccall unsafe "Z3_mk_char"
+    z3_mk_char :: Ptr Z3_context -> CUInt -> IO (Ptr Z3_ast)
+
+foreign import ccall unsafe "Z3_mk_char_le"
+    z3_mk_char_le :: Ptr Z3_context -> Ptr Z3_ast -> Ptr Z3_ast -> IO (Ptr Z3_ast)
+
+foreign import ccall unsafe "Z3_mk_char_to_int"
+    z3_mk_char_to_int :: Ptr Z3_context -> Ptr Z3_ast -> IO (Ptr Z3_ast)
+
+foreign import ccall unsafe "Z3_mk_char_to_bv"
+    z3_mk_char_to_bv :: Ptr Z3_context -> Ptr Z3_ast -> IO (Ptr Z3_ast)
+
+{-
+foreign import ccall unsafe "Z3_mk_char_from_bv"
+    z3_mk_char_to_bv :: Ptr Z3_context -> Ptr Z3_ast -> IO (Ptr Z3_ast)
+-}
+
+foreign import ccall unsafe "Z3_mk_char_is_digit"
+    z3_mk_char_is_digit :: Ptr Z3_context -> Ptr Z3_ast -> IO (Ptr Z3_ast)
 
 ---------------------------------------------------------------------
 -- * Special relations

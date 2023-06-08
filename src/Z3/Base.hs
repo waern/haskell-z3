@@ -115,6 +115,7 @@ module Z3.Base (
   -- * Create context
   , mkContext
   , withContext
+  , updateParamValue
 
   -- * Parameters
   , mkParams
@@ -134,6 +135,7 @@ module Z3.Base (
   , mkIntSort
   , mkRealSort
   , mkBvSort
+  , mkCharSort
   , mkFiniteDomainSort
   , mkArraySort
   , mkArraySortN
@@ -163,6 +165,7 @@ module Z3.Base (
   , mkRealVar
   , mkIntVar
   , mkBvVar
+  , mkCharVar
   , mkFreshVar
   , mkFreshBoolVar
   , mkFreshRealVar
@@ -310,10 +313,12 @@ module Z3.Base (
   , mkSeqExtract
   , mkSeqReplace
   , mkSeqAt
+  , mkSeqNth
   , mkSeqLength
   , mkSeqIndex
   , mkStrToInt
   , mkIntToStr
+  , mkStringToCode
   , mkSeqToRe
   , mkSeqInRe
   , mkRePlus
@@ -327,6 +332,12 @@ module Z3.Base (
   , mkReComplement
   , mkReEmpty
   , mkReFull
+
+  , mkChar
+  , mkCharLe
+  , mkCharToInt
+  , mkCharToBv
+  , mkCharIsDigit
 
   -- * Quantifiers
   , mkPattern
@@ -639,6 +650,7 @@ import Z3.RLock ( RLock, new, with)
 import Control.Applicative ( (<$>), (<*>), (<*), pure )
 import Control.Exception ( Exception, bracket, throw )
 import Control.Monad ( join, when, forM )
+import Data.Char ( ord )
 import Data.Fixed ( Fixed, HasResolution )
 import Data.Foldable ( Foldable (..) )
 import Data.Int
@@ -934,7 +946,10 @@ mkContextWith mkCtx cfg = do
 mkContext :: Config -> IO Context
 mkContext = mkContextWith z3_mk_context_rc
 
--- TODO: Z3_update_param_value
+-- | Set a value of a context parameter.
+updateParamValue :: Context -> String -> String -> IO ()
+updateParamValue = liftFun2 z3_update_param_value
+
 -- TODO: Z3_interrupt
 
 -------------------------------------------------
@@ -1027,6 +1042,15 @@ mkBoolSort = liftFun0 z3_mk_bool_sort
 -- A machine integer can be represented using bit-vectors, see 'mkBvSort'.
 mkIntSort :: Context -> IO Sort
 mkIntSort = liftFun0 z3_mk_int_sort
+
+-- | Create a sort for unicode characters.
+-- 
+-- The sort for characters can be changed to ASCII by setting
+-- the global parameter @encoding@ to @ascii@, or alternatively
+-- to 16 bit characters by setting it to @bmp@.
+--
+mkCharSort :: Context -> IO Sort
+mkCharSort = liftFun0 z3_mk_char_sort
 
 -- | Create the /real/ type.
 --
@@ -1331,6 +1355,12 @@ mkRealVar ctx sym = mkVar ctx sym =<< mkRealSort ctx
 -- See 'mkVar'.
 mkIntVar :: Context -> Symbol -> IO AST
 mkIntVar ctx sym = mkVar ctx sym =<< mkIntSort ctx
+
+-- | Declarate and create a variable of sort /char/.
+--
+-- See 'mkVar'.
+mkCharVar :: Context -> Symbol -> IO AST
+mkCharVar ctx sym = mkVar ctx sym =<< mkCharSort ctx
 
 -- | Declarate and create a variable of sort /bit-vector/.
 --
@@ -2050,6 +2080,16 @@ mkSeqAt :: Context
         -> IO AST
 mkSeqAt = liftFun2 z3_mk_seq_at
 
+-- | Retrieve from s the element positioned at position index.
+--
+-- The function is under-specified if the index is out of bounds.
+--
+mkSeqNth :: Context
+         -> AST -- ^ s
+         -> AST -- ^ index
+         -> IO AST
+mkSeqNth = liftFun2 z3_mk_seq_nth
+
 -- | Return the length of the sequence s.
 mkSeqLength :: Context
             -> AST -- ^ s
@@ -2074,6 +2114,14 @@ mkStrToInt = liftFun1 z3_mk_str_to_int
 -- | Integer to string conversion.
 mkIntToStr :: Context -> AST -> IO AST
 mkIntToStr = liftFun1 z3_mk_int_to_str
+
+-- | String to code conversion.
+mkStringToCode :: Context -> AST -> IO AST
+mkStringToCode = liftFun1 z3_mk_string_to_code
+
+-- | String from code conversion.
+mkStringFromCode :: Context -> AST -> IO AST
+mkStringFromCode = liftFun1 z3_mk_string_from_code
 
 -- | Create a regular expression that accepts the sequence.
 mkSeqToRe :: Context -> AST -> IO AST
@@ -2152,6 +2200,26 @@ mkReEmpty = liftFun1 z3_mk_re_empty
 -- | Create an universal regular expression of sort re.
 mkReFull :: Context -> Sort -> IO AST
 mkReFull = liftFun1 z3_mk_re_full
+
+-- | Create a character literal.
+mkChar :: Context -> Char -> IO AST
+mkChar ctx c = liftFun1 z3_mk_char ctx (ord c)
+
+-- | Create less than or equal to between two characters.
+mkCharLe :: Context -> AST -> AST -> IO AST
+mkCharLe = liftFun2 z3_mk_char_le
+
+-- | Create an integer (code point) from a character.
+mkCharToInt :: Context -> AST -> IO AST
+mkCharToInt = liftFun1 z3_mk_char_to_int
+
+-- | Create a bit-vector (code point) from a character.
+mkCharToBv :: Context -> AST -> IO AST
+mkCharToBv = liftFun1 z3_mk_char_to_bv
+
+-- | Create a check if the character is a digit.
+mkCharIsDigit :: Context -> AST -> IO AST
+mkCharIsDigit = liftFun1 z3_mk_char_is_digit
 
  ---------------------------------------------------------------------
 -- Quantifiers

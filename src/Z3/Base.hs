@@ -621,6 +621,7 @@ module Z3.Base (
   , mkSolver
   , mkSimpleSolver
   , mkSolverForLogic
+  , mkSolverFromTactic
   , solverGetHelp
   , solverSetParams
   , solverPush
@@ -4016,6 +4017,9 @@ mkSimpleSolver = liftFun0 z3_mk_simple_solver
 mkSolverForLogic :: Context -> Logic -> IO Solver
 mkSolverForLogic c logic = mkStringSymbol c (show logic) >>= \sym ->
   toHsCheckError c $ \cPtr -> z3_mk_solver_for_logic cPtr $ unSymbol sym
+
+mkSolverFromTactic :: Context -> Tactic -> IO Solver
+mkSolverFromTactic = liftFun1 z3_mk_solver_from_tactic
 
 -- | Return a string describing all solver available parameters.
 solverGetHelp :: Context -> Solver -> IO String

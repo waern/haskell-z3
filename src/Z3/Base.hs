@@ -3975,6 +3975,10 @@ data Logic
     -- ^ Unquantified non-linear real arithmetic with uninterpreted sort
     -- and function symbols.
 
+  | QF_S
+
+  | QF_SLIA
+
   | UFLRA
     -- ^ Linear real arithmetic with uninterpreted sort and function
     -- symbols.
@@ -4005,6 +4009,8 @@ instance Show Logic where
   show QF_UFLIA  = "QF_UFLIA"
   show QF_UFLRA  = "QF_UFLRA"
   show QF_UFNRA  = "QF_UFNRA"
+  show QF_S      = "QF_S"
+  show QF_SLIA   = "QF_SLIA"
   show UFLRA     = "UFLRA"
   show UFNIA     = "UFNIA"
 

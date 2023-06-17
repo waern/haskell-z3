@@ -76,6 +76,7 @@ module Z3.Base (
   , Tactic
   , ApplyResult
   , Goal
+  , Stats
   -- ** Satisfiability result
   , Result(..)
 
@@ -639,7 +640,12 @@ module Z3.Base (
   , solverGetProof
   , solverGetUnsatCore
   , solverGetReasonUnknown
+  , solverGetStatistics
   , solverToString
+
+  -- ** Statistics
+  , statsToString
+
   -- ** Helpers
   , solverCheckAndGetModel
   ) where
@@ -809,6 +815,8 @@ data ASTKind
     | Z3_UNKNOWN_AST
     deriving (Eq, Show)
 
+newtype Stats = Stats { unStats :: ForeignPtr Z3_stats }
+    deriving Eq
 
 ---------------------------------------------------------------------
 -- * Algebraic Numbers
@@ -4101,9 +4109,18 @@ solverGetUnsatCore = liftFun1 z3_solver_get_unsat_core
 solverGetReasonUnknown :: Context -> Solver -> IO String
 solverGetReasonUnknown = liftFun1 z3_solver_get_reason_unknown
 
+solverGetStatistics :: Context -> Solver -> IO Stats
+solverGetStatistics = liftFun1 z3_solver_get_statistics
+
 -- | Convert the given solver into a string.
 solverToString :: Context -> Solver -> IO String
 solverToString = liftFun1 z3_solver_to_string
+
+-------------------------------------------------
+-- ** Statistics
+
+statsToString :: Context -> Stats -> IO String
+statsToString = liftFun1 z3_stats_to_string
 
 -------------------------------------------------
 -- ** Helpers
@@ -4364,6 +4381,10 @@ instance Marshal ApplyResult (Ptr Z3_apply_result) where
 instance Marshal Goal (Ptr Z3_goal) where
   c2h = mkC2hRefCount Goal z3_goal_inc_ref z3_goal_dec_ref
   h2c goa = withForeignPtr (unGoal goa)
+
+instance Marshal Stats (Ptr Z3_stats) where
+  c2h = mkC2hRefCount Stats z3_stats_inc_ref z3_stats_dec_ref
+  h2c st = withForeignPtr (unStats st)
 
 marshal :: Marshal rh rc => (Ptr Z3_context -> t) ->
               Context -> (t -> IO rc) -> IO rh
